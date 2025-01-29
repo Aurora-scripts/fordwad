@@ -1,0 +1,5 @@
+sound = Instance.new("Sound",workspace)
+sound.Name = "Noooooooooooooooot noooooooooooooooooooooooot"
+sound.SoundId = "rbxassetid://1839246711"
+sound:Play()
+sound.Looped = true
