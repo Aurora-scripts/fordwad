@@ -1,1 +1,292 @@
-require(17223407728):smil("localplayer")
+
+
+-- Get the Lighting service
+local Lighting = game:GetService("Lighting")
+
+-- Set the Lighting properties for a foggy atmosphere
+Lighting.Ambient = Color3.fromRGB(50, 50, 50)  -- Set ambient light to a dark gray (soft, not too dark)
+Lighting.Brightness = 2  -- Increase brightness a bit for more visibility
+Lighting.OutdoorAmbient = Color3.fromRGB(50, 50, 50)  -- Set outdoor ambient light to dark gray
+Lighting.TimeOfDay = "00:00:00"  -- Set the time to midnight (no daylight)
+Lighting.FogColor = Color3.fromRGB(100, 100, 100)  -- Set fog color to medium grey (still foggy, but lighter)
+Lighting.FogStart = 50  -- Start the fog a little further in, for less density
+Lighting.FogEnd = 200  -- Set the fog to end at a reasonable distance (can adjust for less/further fog)
+
+-- Script to make everything disappear in the game except for the players' characters
+
+-- Function to make everything disappear
+local function makeEverythingDisappear()
+    -- Get the player character references
+    local players = game:GetService("Players")
+    
+    -- Loop through all parts in the workspace
+    for _, object in pairs(workspace:GetDescendants()) do
+        -- Check if the object is a part (BasePart)
+        if object:IsA("BasePart") then
+            local isPartOfPlayer = false
+
+            -- Check if the part belongs to a player character
+            for _, player in pairs(players:GetPlayers()) do
+                local character = player.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    -- Check if the object is part of this player's character
+                    if object:IsDescendantOf(character) then
+                        isPartOfPlayer = true
+                        break
+                    end
+                end
+            end
+
+            -- If the part belongs to a player character, skip it
+            if isPartOfPlayer then
+                continue
+            end
+
+            -- Make the part transparent (invisible)
+            object.Transparency = 1
+            -- Disable collisions so you can't interact with it
+            object.CanCollide = true
+        end
+    end
+end
+
+-- Call the function
+makeEverythingDisappear()
+
+
+local hands = game:GetObjects("rbxassetid://110130470810270")[1]
+hands.Parent = workspace
+
+local Player = game.Players.LocalPlayer
+local AnimHandler = loadstring(game:HttpGet("https://raw.githubusercontent.com/ProudNamed/SuperLightning/refs/heads/main/AnimModule/MainModule"))()
+
+local Characters = {
+    workspace.HandsModel.Model.hand10,
+    workspace.HandsModel.Model.hand11,
+    workspace.HandsModel.Model.hand12,
+    workspace.HandsModel.Model.hand13,
+    workspace.HandsModel.Model.hand14,
+    workspace.HandsModel.Model.hand15,
+    workspace.HandsModel.Model.hand16,
+    workspace.HandsModel.Model.hand17,
+    workspace.HandsModel.Model.hand1,
+    workspace.HandsModel.Model.hand2,
+    workspace.HandsModel.Model.hand3,
+    workspace.HandsModel.Model.hand4,
+    workspace.HandsModel.Model.hand5,
+    workspace.HandsModel.Model.hand6,
+    workspace.HandsModel.Model.hand7,
+    workspace.HandsModel.Model.hand8,
+    workspace.HandsModel.Model.hand9
+}
+
+local Animations = {
+    game:GetObjects("rbxassetid://114780864572898")[1], 
+    game:GetObjects("rbxassetid://128164323431671")[1], 
+    game:GetObjects("rbxassetid://118809005440807")[1], 
+    game:GetObjects("rbxassetid://138820731759592")[1], 
+    game:GetObjects("rbxassetid://125486592936644")[1],
+    game:GetObjects("rbxassetid://127890234614002")[1],
+    game:GetObjects("rbxassetid://109131514582961")[1],
+    game:GetObjects("rbxassetid://113724009873860")[1],
+    game:GetObjects("rbxassetid://137760149057935")[1],
+    game:GetObjects("rbxassetid://81567836561537")[1],
+    game:GetObjects("rbxassetid://89909983177272")[1],
+    game:GetObjects("rbxassetid://82297976556201")[1],
+    game:GetObjects("rbxassetid://75503920894534")[1],
+    game:GetObjects("rbxassetid://116002144328825")[1],
+    game:GetObjects("rbxassetid://122192333415346")[1],
+    game:GetObjects("rbxassetid://70530310789520")[1],
+    game:GetObjects("rbxassetid://110657744178355")[1]
+}
+
+-- DomainSphere setup
+local domainsphere = game:GetObjects("rbxassetid://102038754309977")[1]
+domainsphere.Parent = workspace
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character
+local AnimHandler = loadstring(game:HttpGet("https://raw.githubusercontent.com/ProudNamed/SuperLightning/refs/heads/main/AnimModule/MainModule"))()
+local Walk = game:GetObjects("rbxassetid://94131913569785")[1]
+Walk.Parent = Character
+local WalkAnim = AnimHandler.new(Character,Walk)
+WalkAnim:Play()
+
+-- Function to expand icospheres
+local domain = {}
+
+function domain.Expand(Model)
+    local originalPart = {}
+    local T = 1
+
+    while T ~= 390 do
+        for i, v in pairs(Model:GetChildren()) do
+            if v:IsA("MeshPart") and v.Name == "icosphere.".. T then
+                originalPart[T] = {Size = v.Size, ["Instance"] = v}
+                T += 1
+                v.Transparency = 1
+                v.Size = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+
+    local function domainEffect(Table)
+        task.spawn(function()
+            for i, v in pairs(Table) do
+                local part = v.Instance
+                local size = v.Size
+                if part:IsA("MeshPart") and part.Transparency == 1 then
+                    task.spawn(function()
+                        local info = TweenInfo.new(1)
+                        part.Transparency = 0
+                        game.TweenService:Create(part, info, {Size = size}):Play()
+                    end)
+                    task.wait()
+                end
+            end
+        end)
+    end
+
+    -- Repeating the expansion multiple times for effect
+    for _ = 1, 10 do
+        domainEffect(originalPart)
+    end
+end
+
+-- Trigger domain expand on domainsphere parts
+domain.Expand(domainsphere)
+
+
+
+-- Function to make hands and its children follow the player's torso and rotate by 180 degrees
+local function updateHandsPosition()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+
+    -- Check if the humanoidRootPart exists
+    if humanoidRootPart then
+        -- Set the hands' position to a point relative to the humanoidRootPart
+        local offset = Vector3.new(0, -14, 26)  -- Adjust the position offset if needed
+        -- Calculate the position and orientation relative to the humanoidRootPart
+        local targetCFrame = humanoidRootPart.CFrame * CFrame.new(offset)
+
+        -- Apply a 180-degree rotation (rotate along the Y-axis, for example)
+        local rotation = CFrame.Angles(0, math.rad(180), 0)  -- Rotate 180 degrees around Y-axis
+        targetCFrame = targetCFrame * rotation
+
+        -- Use PivotTo to move the hands model to the target position with rotation
+        hands:SetPrimaryPartCFrame(targetCFrame)
+
+        -- Loop through all children of the hands model and position them similarly
+        for _, child in ipairs(hands:GetChildren()) do
+            if child:IsA("Model") then
+                -- Set the child's pivot position relative to the humanoidRootPart and apply the same rotation
+                local childOffset = humanoidRootPart.CFrame * CFrame.new(offset)
+            end
+        end
+    end
+end
+
+-- Call the function to update the hands position with rotation
+updateHandsPosition()
+
+
+-- Make sure the "icosphere.1" part exists inside the domainsphere
+local icospherePart = domainsphere:FindFirstChild("icosphere.1")
+
+if icospherePart then
+    -- Function to set the position of the icosphere to the player's torso with a forward offset
+    local function setIcospherePosition()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+
+        -- Check if the humanoidRootPart exists
+        if humanoidRootPart then
+            local forwardOffset = humanoidRootPart.CFrame.LookVector * 70  -- 2 units forward, adjust as needed
+            -- Set the icosphere's position to the humanoidRootPart's position + forward offset
+            icospherePart.CFrame = humanoidRootPart.CFrame + forwardOffset
+        end
+    end
+
+    -- Call the function to position the icosphere immediately after loading the domainsphere
+    setIcospherePosition()
+end
+
+
+-- Load the aurafordomain model
+local aurafordomain = game:GetObjects("rbxassetid://139758006094554")[1]
+aurafordomain.Parent = workspace
+
+-- Get the reference to RootPart4 inside hand4
+local hand4 = workspace.HandsModel.Model.hand4
+local rootPart4 = hand4:FindFirstChild("RootPart4")
+
+if rootPart4 then
+    -- Loop through all parts in aurafordomain and adjust their CFrame to match RootPart4's CFrame
+    for _, part in ipairs(aurafordomain:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.CFrame = rootPart4.CFrame  -- Set each part's CFrame to match RootPart4's CFrame
+        end
+    end
+end
+
+-- Set up the animations for each character
+local WalkAnims = {}
+
+for i, Character in ipairs(Characters) do
+    local WalkAnim = AnimHandler.new(Character, Animations[i])
+    WalkAnim:Play()  -- Play animation immediately
+    table.insert(WalkAnims, WalkAnim)  -- Store the instance in the list
+end
+
+-- Function to clean everything and reset the game state
+local function resetAll()
+
+    -- Reset hands position (if required, remove them from workspace)
+    hands:Destroy()
+    
+    -- Reset the position of the domainsphere and icosphere
+    domainsphere:Destroy()
+    
+    -- Remove aurafordomain
+    aurafordomain:Destroy()
+    
+    -- Stop animations for all characters
+    for _, walkAnim in ipairs(WalkAnims) do
+        walkAnim:Stop()  -- Stop the animation
+    end
+
+    -- Reset the characters' models to their default positions or any needed state
+    for _, Character in ipairs(Characters) do
+        Character:SetPrimaryPartCFrame(CFrame.new(0, 0, 0))  -- Reset position to origin or some default position
+    end
+
+    -- Clean up other changes like root part or any transformations you might have made
+    for _, hand in ipairs(workspace.HandsModel.Model:GetChildren()) do
+        if hand:IsA("Model") then
+            -- Reset the hand's position if needed
+            hand:SetPrimaryPartCFrame(CFrame.new(0, 0, 0))  -- Or use your preferred reset value
+        end
+    end
+
+    -- Any additional cleanup (like removing parts, resetting other effects, etc.) can be added here
+end
+
+-- Function to trigger cleanup after all hand animations end
+local function cleanUpAfterAnimations()
+    -- Wait for all animations to finish
+    for _, walkAnim in ipairs(WalkAnims) do
+        while walkAnim.IsPlaying do
+            task.wait(1)  -- Wait for the animation to finish
+        end
+    end
+
+    -- After animations finish, reset everything
+    resetAll()
+end
+
+-- Trigger the cleanup function
+cleanUpAfterAnimations()
+
