@@ -1,3 +1,17 @@
+math.randomseed(tick())
+
+function RandomCharacters(length)
+	local STR = ''
+
+	for i = 1, length do
+		STR = STR .. string.char(math.random(65,90))
+	end
+
+	return STR
+end
+
+local delete = getgenv and getgenv().delete or _G.delete
+
 sound = Instance.new("Sound",workspace)
 sound.Name = "Noooooooooooooooot noooooooooooooooooooooooot"
 sound.SoundId = "rbxassetid://1839246711"
